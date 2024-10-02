@@ -25,10 +25,11 @@ fetch("https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFe
         const negativeData = migrationData.negMigration;
         const geojsonLayer = L.geoJSON(geojsonData, {
             style: function(feature) {
-                const id = feature.id
-                const municipalityIndex = parseInt(id.split(".")[1] -1)
-                const posValue = positiveData.dataset.value[municipalityIndex];
-                const negValue = negativeData.dataset.value[municipalityIndex];
+                const kuntaValue = feature.properties.kunta;
+                const searchName = "KU" + kuntaValue;
+                const index = positiveData.dataset.dimension.Tuloalue.category.index[searchName];
+                const posValue = positiveData.dataset.value[index];
+                const negValue = negativeData.dataset.value[index];
                 const color = getColor(posValue, negValue);
                 return {
                     weight: 2,
@@ -37,12 +38,13 @@ fetch("https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFe
             },
             onEachFeature: function(feature, layer) {
                 layer.bindTooltip(feature.properties.name);
-                const id = feature.id;
-                const municipalityIndexPopup = parseInt(id.split(".")[1] -1);
-                const posValuePopup = positiveData.dataset.value[municipalityIndexPopup];
-                const negValuePopup = negativeData.dataset.value[municipalityIndexPopup];
+                const kuntaValue = feature.properties.kunta;
+                const searchName = "KU" + kuntaValue;
+                const index = positiveData.dataset.dimension.Tuloalue.category.index[searchName];
+                const posValuePopup = positiveData.dataset.value[index];
+                const negValuePopup = negativeData.dataset.value[index];
                 layer.on("click", function () {
-                    const popupContent = feature.properties.name + posValuePopup + negValuePopup;
+                    const popupContent = "Municipality: " + feature.properties.name + " positive: " + posValuePopup + " negative " + negValuePopup;
                     layer.bindPopup(popupContent).openPopup();
                 });
             }
